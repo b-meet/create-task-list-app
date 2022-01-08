@@ -10,26 +10,28 @@ body {
 		sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-	background: rgb(250, 246, 240);
+	background: rgb(182, 220, 255);
 }
 
 .content-container {
 	max-width: 35rem;
 	height: max-content;
-	margin: 7rem auto 0;
-	padding: 1.5rem 1rem;
+	margin: 7rem auto;
+	padding: 1.5rem 1rem 0.5rem;
 	border-radius: 0.35rem;
 	background: #fff;
 	box-shadow: -5px 5px 15px 0 rgba(0, 0, 0, 0.1);
 }
 
-.message-green,
-.message-red {
+.message-red,
+.message-green {
+	width: 29rem;
 	font-size: 0.65rem;
 	text-transform: uppercase;
-	width: max-content;
+	letter-spacing: 1px;
+	padding: 0.2rem 0;
 	margin: 0 auto 1rem;
-	padding: 0.2rem 10rem;
+	text-align: center;
 	border-radius: 0.2rem;
 	color: rgb(34, 139, 34);
 	background: rgba(129, 196, 129, 0.55);
@@ -41,7 +43,7 @@ body {
 
 .heading {
 	width: max-content;
-	margin: 0 auto 2rem;
+	margin: 0 auto 1.5rem;
 	letter-spacing: 1px;
 	text-transform: capitalise;
 }
@@ -61,7 +63,6 @@ body {
 }
 
 ::placeholder {
-	font-variant: small-caps;
 	color: rgb(149, 172, 172);
 }
 
@@ -76,8 +77,32 @@ body {
 	cursor: pointer;
 }
 
-.btn:hover {
+.btn:hover,
+.btn:focus {
 	background: rgb(21, 132, 236);
+}
+
+.clear-btn {
+	border: none;
+	outline: none;
+	margin: 1rem auto;
+	padding: 0.25rem 1rem;
+	color: rgb(255, 139, 139);
+	font-weight: bold;
+	cursor: pointer;
+	letter-spacing: 1px;
+	border-radius: 0.25rem;
+}
+
+.clear-btn:hover,
+.clear-btn:focus {
+	background: rgb(255, 139, 139);
+	color: rgb(239, 239, 239);
+}
+
+.clear-btn-container {
+	margin: auto;
+	max-width: max-content;
 }
 
 .list-container {
@@ -110,14 +135,16 @@ body {
 	color: rgb(13, 175, 13);
 }
 
-.edit-btn:hover {
+.edit-btn:hover,
+.edit-btn:focus {
 	color: rgb(15, 126, 15);
 }
 
 .delete-btn {
-	color: rgb(211, 62, 57);
+	color: rgb(255, 69, 62);
 }
 
-.delete-btn:hover {
+.delete-btn:hover,
+.delete-btn:focus {
 	color: rgb(211, 0, 0);
 }
