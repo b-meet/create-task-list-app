@@ -82,6 +82,30 @@ body {
 	background: rgb(21, 132, 236);
 }
 
+@media (max-width: 590px) {
+	.content-container {
+		max-width: 20rem;
+	}
+
+	.heading {
+		font-size: 1.35rem;
+	}
+
+	#item {
+		max-width: 12rem;
+		padding: 0.25rem 0.45rem;
+	}
+
+	.btn {
+		padding: 0.25rem 0.65rem;
+	}
+
+	.message-green,
+	.message-red {
+		width: 15rem;
+	}
+}
+
 .clear-btn {
 	border: none;
 	outline: none;
