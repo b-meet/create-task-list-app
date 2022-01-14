@@ -1,4 +1,4 @@
-import { useState, useEffect, useReducer } from "react";
+import { useState, useEffect, useReducer, useRef } from "react";
 import List from "./List";
 import Message from "./message";
 
@@ -70,12 +70,7 @@ function App() {
 		if (action.type === "SUBMIT_EDIT") {
 			return {
 				...state,
-				list: state.list.map((item) => {
-					if (item.id === state.editId) {
-						return { ...item, chore: input };
-					}
-					return item;
-				}),
+				list: action.payload,
 				messageContent: "Chore Updated",
 				messageStyle: " message-green",
 				isEditing: false,
@@ -85,7 +80,7 @@ function App() {
 	};
 
 	const initialState = {
-		list: [],
+		list: getLocalStorage(),
 		messageContent: "",
 		messageStyle: "",
 		isEditing: false,
@@ -94,6 +89,7 @@ function App() {
 
 	const [input, setInput] = useState(""); //the value entered by user
 	const [state, dispatch] = useReducer(reducer, initialState);
+	const refContainer = useRef(undefined);
 
 	//get the input by user
 
@@ -110,7 +106,14 @@ function App() {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		if (input && state.isEditing) {
-			dispatch({ type: "SUBMIT_EDIT" });
+			const newEditedList = state.list.map((item) => {
+				if (item.id === state.editId) {
+					return { ...item, chore: input };
+				}
+				return item;
+			});
+			dispatch({ type: "SUBMIT_EDIT", payload: newEditedList });
+			setInput("");
 		} else if (input) {
 			const newItem = { id: new Date().getTime().toString(), chore: input };
 			dispatch({ type: "ADD_CHORE", payload: newItem });
@@ -135,8 +138,8 @@ function App() {
 	const handleEdit = (id) => {
 		const specificItem = state.list.find((item) => item.id === id);
 		setInput(specificItem.chore);
-
 		dispatch({ type: "EDIT_CHORE", payload: id });
+		refContainer.current.focus();
 	};
 
 	//runs when user click clearAll btn
@@ -159,6 +162,7 @@ function App() {
 					name='item'
 					id='item'
 					value={input}
+					ref={refContainer}
 					onChange={handleChange}
 					placeholder='Type your chore'
 				/>
