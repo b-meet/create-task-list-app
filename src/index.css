@@ -147,6 +147,10 @@ body {
 	padding: 0.3rem 0.5rem;
 }
 
+.list-data > p {
+	max-width: 25rem;
+}
+
 .edit-btn,
 .delete-btn {
 	border: none;

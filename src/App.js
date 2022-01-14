@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useReducer, useRef } from "react";
 import List from "./List";
+import Message from "./message";
 
 //to preserve value on reload
 
@@ -12,12 +13,83 @@ const getLocalStorage = () => {
 };
 
 function App() {
+	const reducer = (state, action) => {
+		if (action.type === "ADD_CHORE") {
+			return {
+				...state,
+				list: [...state.list, action.payload],
+				messageContent: "Chore Added",
+				messageStyle: "message-green",
+			};
+		}
+
+		if (action.type === "NO_VALUE") {
+			return {
+				...state,
+				messageContent: "Please Write A Chore",
+				messageStyle: "message-red",
+			};
+		}
+
+		if (action.type === "DELETE_CHORE") {
+			return {
+				...state,
+				list: action.payload,
+				messageContent: "Chore deleted",
+				messageStyle: "message-red",
+			};
+		}
+
+		if (action.type === "CLEAR_ALL") {
+			return {
+				...state,
+				list: [],
+				messageContent: "List was Cleared",
+				messageStyle: "message-red",
+			};
+		}
+
+		if (action.type === "CLOSE_MESSAGE") {
+			return {
+				...state,
+				messageContent: "",
+				messageStyle: "",
+			};
+		}
+
+		if (action.type === "EDIT_CHORE") {
+			return {
+				...state,
+				messageContent: "Edit Your Chore",
+				messageStyle: "message-red",
+				isEditing: true,
+				editId: action.payload,
+			};
+		}
+
+		if (action.type === "SUBMIT_EDIT") {
+			return {
+				...state,
+				list: action.payload,
+				messageContent: "Chore Updated",
+				messageStyle: " message-green",
+				isEditing: false,
+				editId: "",
+			};
+		}
+	};
+
+	const initialState = {
+		list: getLocalStorage(),
+		messageContent: "",
+		messageStyle: "",
+		isEditing: false,
+		editId: "",
+	};
+
 	const [input, setInput] = useState(""); //the value entered by user
-	const [list, setList] = useState(getLocalStorage()); //storage of the values
-	const [message, setMessage] = useState(""); //message to be displayed based on activity
-	const [style, setStyle] = useState(""); //Style to be applied on the message
-	const [isEditing, setIsEditing] = useState(false);
-	const [editId, setEditId] = useState("");
+	const [state, dispatch] = useReducer(reducer, initialState);
+	const refContainer = useRef(undefined);
 
 	//get the input by user
 
@@ -26,80 +98,63 @@ function App() {
 	};
 
 	useEffect(() => {
-		const timeout = setTimeout(() => {
-			setMessage("");
-			setStyle("");
-		}, 3000);
-		return () => clearTimeout(timeout);
-	}, [message, style]);
-
-	useEffect(() => {
-		localStorage.setItem("list", JSON.stringify(list));
-	}, [list]);
+		localStorage.setItem("list", JSON.stringify(state.list));
+	}, [state.list]);
 
 	//runs when user clicks add btn or hits enter
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		if (input && isEditing) {
-			setList(
-				list.map((item) => {
-					if (item.id === editId) {
-						return { ...item, chore: input };
-					}
-					return item;
-				})
-			);
+		if (input && state.isEditing) {
+			const newEditedList = state.list.map((item) => {
+				if (item.id === state.editId) {
+					return { ...item, chore: input };
+				}
+				return item;
+			});
+			dispatch({ type: "SUBMIT_EDIT", payload: newEditedList });
 			setInput("");
-			setEditId("");
-			setIsEditing(false);
-			setMessage("Chore was updated");
-			setStyle("message-green");
 		} else if (input) {
-			const value = { chore: input, id: new Date().getTime().toString() };
-			setList([...list, value]);
-			setMessage("Chore Added");
-			setStyle("message-green");
+			const newItem = { id: new Date().getTime().toString(), chore: input };
+			dispatch({ type: "ADD_CHORE", payload: newItem });
 			setInput("");
 		} else {
-			setMessage("Please Add Some Chore");
-			setStyle("message-red");
+			dispatch({ type: "NO_VALUE" });
 		}
 	};
 
 	//runs on deleting any chore
 
 	const handleDelete = (id) => {
-		let newList = list.filter((item) => {
+		let newList = state.list.filter((item) => {
 			return id !== item.id;
 		});
-		setList(newList);
-		setMessage("Chore was deleted");
-		setStyle("message-red");
+		console.log(newList);
+		dispatch({ type: "DELETE_CHORE", payload: newList });
 	};
 
 	// runs when the user wants to edit the chore
 
 	const handleEdit = (id) => {
-		const specificItem = list.find((item) => item.id === id);
+		const specificItem = state.list.find((item) => item.id === id);
 		setInput(specificItem.chore);
-		setIsEditing(true);
-		setEditId(id);
-		setMessage("Edit Your chore");
-		setStyle("message-green");
+		dispatch({ type: "EDIT_CHORE", payload: id });
+		refContainer.current.focus();
 	};
 
 	//runs when user click clearAll btn
 
 	const handleClearAll = () => {
-		setList([]);
-		setMessage("List was Cleared");
-		setStyle("message-red");
+		dispatch({ type: "CLEAR_ALL" });
 	};
 
 	return (
 		<section className='content-container'>
-			<p className={style}>{message}</p>
+			<Message
+				dispatch={dispatch}
+				style={state.messageStyle}
+				message={state.messageContent}
+			/>
 			<h2 className='heading'>Task List</h2>
 			<form className='form-container'>
 				<input
@@ -107,15 +162,16 @@ function App() {
 					name='item'
 					id='item'
 					value={input}
+					ref={refContainer}
 					onChange={handleChange}
 					placeholder='Type your chore'
 				/>
 				<button onClick={handleSubmit} type='submit' className='btn'>
-					{isEditing ? "Edit" : "Add"}
+					{state.isEditing ? "Edit" : "Add"}
 				</button>
 			</form>
-			<List data={list} remove={handleDelete} edit={handleEdit} />
-			{list.length <= 0 || (
+			<List data={state.list} remove={handleDelete} edit={handleEdit} />
+			{state.list.length <= 0 || (
 				<section className='clear-btn-container'>
 					<button type='reset' className='clear-btn' onClick={handleClearAll}>
 						Clear All
