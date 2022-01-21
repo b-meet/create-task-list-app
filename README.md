@@ -2,7 +2,7 @@
 
 This app about making list of your daily tasks.
 
-#functionalities
+# functionalities
 
 1. You can Edit your chore/task
 2. You can delete your chore/task
